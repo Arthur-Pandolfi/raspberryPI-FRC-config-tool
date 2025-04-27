@@ -1,0 +1,18 @@
+# Terminal Files and system files
+.pyenv
+.oh-my-zsh
+.shell*
+.bash*
+.wget-hsts
+.profile
+.motd_shown
+.vscode-server
+.landscape
+.cache
+.p10k.zsh
+.python*
+.z*
+powerlevel10k
+.viminfo
+.sudo*
+.local
