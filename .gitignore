@@ -1,18 +1,34 @@
-# Terminal Files and system files
-.pyenv
-.oh-my-zsh
-.shell*
-.bash*
-.wget-hsts
-.profile
-.motd_shown
-.vscode-server
-.landscape
-.cache
-.p10k.zsh
-.python*
+# Terminal Files
 .z*
+.bash*
+.shell*
+.profile
+.p10k.zsh
+.oh-my-zsh
 powerlevel10k
-.viminfo
+
+# Python cache
+.venv
+.pyenv
+.cache
+.python*
+__pycache__
+connect-windows.py
+
+# Miscelaneous
+snap
 .sudo*
 .local
+.dotnet
+.config
+.viminfo
+.landscape
+.wget-hsts
+.motd_shown
+
+# Vscode
+.vscode-server
+.vscode
+
+# Git
+.gitconfig
