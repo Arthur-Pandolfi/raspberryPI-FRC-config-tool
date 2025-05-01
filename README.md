@@ -1,1 +1,3 @@
-192.168.15.16
+Im write this after
+
+A custom frc OS to raspberryPi, modifying everything in networktables, using SSH or FTP to connect to the rasp to upload yout program

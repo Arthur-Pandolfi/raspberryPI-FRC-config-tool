@@ -27,6 +27,9 @@ snap
 .motd_shown
 .selected_editor
 
+# Logs
+output.log
+
 # Vscode
 .vscode-server
 .vscode
