@@ -25,6 +25,7 @@ snap
 .landscape
 .wget-hsts
 .motd_shown
+.selected_editor
 
 # Vscode
 .vscode-server
