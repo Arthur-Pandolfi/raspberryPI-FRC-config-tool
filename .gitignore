@@ -28,6 +28,7 @@ snap
 .selected_editor
 
 # Logs
+logs
 output.log
 
 # Vscode

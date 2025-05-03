@@ -10,7 +10,7 @@ while getopts t: opt; do
       type=$OPTARG
       ;;
     *)
-      echo "Uso: $0 -t <total|network>"
+      echo "Use: $0 -t <total|network>"
       exit 1
       ;;
   esac

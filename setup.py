@@ -1,7 +1,4 @@
-from ._utils import (
-    config,
-    errors
-)
+from ._utils import config, errors
 import gc
 import argparse
 
@@ -17,22 +14,22 @@ execution_type = args.type
 print("Type press Ctrl+C to exit\n")
 
 def _team_number_config():
-        number = config.get_team_number()
-        config.set_team_number(number=number)
-
+    number = config.get_team_number()
+    config.set_team_number(number=number)
 
 def _network_config():
-        config.set_roboRIO_ip()
-        ip, netmask = config.get_wanted_ip()
-        config.set_rasp_ip(ip, netmask)
+    config.set_roboRIO_ip()
+    config.set_raspberry_name()
+    ip, netmask = config.get_wanted_ip()
+    config.set_rasp_ip(ip, netmask)
 
 if execution_type == "total":
     _team_number_config()
     _network_config()
-
 elif execution_type == "network":
        _network_config()
 else:
-       raise errors.InvalidArgumentError("Invalid argument, use --type")
+    raise errors.InvalidArgumentError("Invalid argument, use --type")
 
+print("\nEnd of setup!\n")
 gc.collect()
