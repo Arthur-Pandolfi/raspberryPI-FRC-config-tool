@@ -1,11 +1,20 @@
 import gc
+import psutil
 import asyncio
+import subprocess
 from _utils import environment, logs
+from _utils.networktables import update_values
 from networktables import NetworkTables
 
 LOGS_PATH = "./logs/startup.log"
 logs.create_log(LOGS_PATH)
 
+def _get_ip():
+    ip = subprocess.run(["ifconfig eth0 | grep inet"], shell=True,  capture_output=True, text=True)
+    ip = ip.stdout.split()
+    return ip[1]
+
+# ----------------------------------------- Network Tables initialization -----------------------------------------
 async def _connect_network_tables() -> bool:
     roboRIO_ip = environment.get_environment_var("ROBORIO_IP")
     NetworkTables.initialize(roboRIO_ip)
@@ -48,16 +57,27 @@ async def _create_system_substable_entrys():
 async def _create_infos_subtable_entrys():
     table = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME"))
     infos_table = table.getSubTable("Infos")  
+
+    disk_total, disk_used, disk_free = await update_values.get_disk_usage()
+    ram_total, ram_usage, ram_free = await update_values.get_ram()
     
-    infos_table.getEntry("Hardware_Usage").setStringArray([""])
-    infos_table.getEntry("CPU_Count").setNumber(0)
-    infos_table.getEntry("Memory_Info").getDoubleArray(0.0)
+    cpu_count = psutil.cpu_count()
+    cpu_temp = 50 
+    cpu_usage = await update_values.get_cpu_usage()
+    # Im dont using this function bacause im emualting the ubuntu in WSL 2.0, and don't have sesnors to get CPU temp 
+    # await update_values.get_cpu_temperature()
+    
+
+    infos_table.getEntry("CPU_Info").setStringArray([cpu_count, cpu_usage, f"{cpu_temp}Cº"])
+    infos_table.getEntry("Disk_info").setStringArray([f"{disk_total:.2f} GB", f"{disk_used:.2f} GB", f"{disk_free:.2f} GB"])
     infos_table.getEntry("Coral_is_available").setBoolean(False)
-    infos_table.getEntry("IP").setString("")
-    infos_table.getEntry("RAM").setDoubleArray([0.0])
-    infos_table.getEntry("Hearthbeat").setBoolean(False)
-    infos_table.getEntry("Status").setString("")
+    infos_table.getEntry("IP").setString(_get_ip())
+    infos_table.getEntry("RAM").setStringArray([f"{ram_total:.2f}", f"{ram_usage:.2f}",f"{ram_free:.2f}"])
+    infos_table.getEntry("Hearthbeat").setBoolean(True)
+    infos_table.getEntry("Status").setString("Starting vision script")
     infos_table.getEntry("Error").setStringArray([""])
+
+    gc.collect()
 
 async def _create_entrys():
     logs.write_log(LOGS_PATH, f"Creating entrys {logs.get_time()} \n")
@@ -68,23 +88,21 @@ async def _create_entrys():
     logs.write_log(LOGS_PATH, f"All entrys created! {logs.get_time()} \n")
     NetworkTables.flush()
     gc.collect()
+# ----------------------------------------- Network Tables initialization -----------------------------------------
 
-# -------------------------------------------- Network Initialization -----------------------------------------------
-
+# Main functions
 async def _network_tables():
     await _connect_network_tables()
     await _create_table()
     await _create_subtables()
     await _create_entrys()
 
-# -------------------------------------------- Network Initialization -----------------------------------------------
 
 async def main():
-    routine1 = asyncio.create_task(_network_tables())
+     print("starting")
+     await _network_tables()
+     print("finish")
 
-    await asyncio.gather(
-        routine1
-    )
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -23,6 +23,9 @@ def _network_config():
     ip, netmask = config.get_wanted_ip()
     config.set_rasp_ip(ip, netmask)
 
+def _install_dependencies():
+     pass
+
 if execution_type == "total":
     _team_number_config()
     _network_config()

@@ -1,1 +1,4 @@
+pycoral
+gpiozero
+tflite-runtime
 pynetwroktables

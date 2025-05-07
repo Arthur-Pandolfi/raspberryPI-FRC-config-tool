@@ -19,13 +19,16 @@ connect-windows.py
 snap
 .sudo*
 .local
+builds
 .dotnet
 .config
 .viminfo
+.lgd-nfy0
 .landscape
 .wget-hsts
 .motd_shown
 .selected_editor
+bazel-6.5.0-installer-linux-x86_64.sh
 
 # Logs
 logs

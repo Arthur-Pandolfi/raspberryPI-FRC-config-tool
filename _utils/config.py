@@ -31,7 +31,7 @@ def get_raspberry_name() -> str:
 
     if name == "0":
         user_name = subprocess.run(["awk -F: '{ print $1 }' /etc/passwd | grep 'frc-'"], shell=True, capture_output=True, text=True)
-        return user_name
+        return user_name.stdout
     else:
         return name
 
