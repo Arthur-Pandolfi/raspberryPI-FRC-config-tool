@@ -1,42 +1,13 @@
-# Terminal Files
-.z*
-.bash*
-.shell*
-.profile
-.p10k.zsh
-.oh-my-zsh
-powerlevel10k
-
 # Python cache
 .venv
 .pyenv
 .cache
 .python*
 __pycache__
-connect-windows.py
-
-# Miscelaneous
-snap
-.sudo*
-.local
-builds
-.dotnet
-.config
-.viminfo
-.lgd-nfy0
-.landscape
-.wget-hsts
-.motd_shown
-.selected_editor
-bazel-6.5.0-installer-linux-x86_64.sh
 
 # Logs
 logs
 output.log
-
-# Vscode
-.vscode-server
-.vscode
 
 # Git
 .gitconfig

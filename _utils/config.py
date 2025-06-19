@@ -27,15 +27,20 @@ def get_wanted_ip() -> list[str, str]:
             print("\nPlease, write a ip and netmask\n")
 
 def get_raspberry_name() -> str:
-    name = input("Enter the wanted name to show in NetworkTables [0 for the user name]")
+    name = input("Enter the wanted name to show in NetworkTables [0 for the user name]: ")
 
     if name == "0":
-        user_name = subprocess.run(["awk -F: '{ print $1 }' /etc/passwd | grep 'frc-'"], shell=True, capture_output=True, text=True)
-        return user_name.stdout
+        user_name = subprocess.run("whoami", shell=True, capture_output=True, text=True)
+        name = f"raspberry-{user_name.stdout}"
+        return name
     else:
         return name
 
 # Set functions
+def reset_envs():
+    with open("/etc/environment", "w+"):
+        pass
+
 def set_raspberry_name():
     name = get_raspberry_name()
     environment.add_environment_var(f"RASPBERRY_NAME={name}")
@@ -60,12 +65,43 @@ def set_roboRIO_ip() -> None:
     gc.collect()
 
 def set_rasp_ip(ip: str, netmask: str = "255.255.255.0") -> None:
-    subprocess.run(f"ifconfig eth0 {ip} netmask {netmask}", shell=True, capture_output=True, text=True)
-    gc.collect()
+    netmask_to_cidr = {
+    "255.0.0.0":        "/8",
+    "255.255.0.0":      "/16",
+    "255.255.255.0":    "/24",
+    "255.255.255.128":  "/25",
+    "255.255.255.192":  "/26",
+    "255.255.255.224":  "/27",
+    "255.255.255.240":  "/28",
+    "255.255.255.248":  "/29",
+    "255.255.255.252":  "/30",
+    "255.255.255.255":  "/32"
+    }
+
+    ip_config_file = f"""
+    interface eth0
+    static ip_address={ip}{netmask_to_cidr[netmask]}
+    static routers={ip}
+    static domain_name_servers=8.8.8.8 1.1.1.1
+    """
+
+    with open("/etc/dhcpcd.conf", "a") as file:
+        file.write("\n" + ip_config_file)
+
 #----------------------------------------------- Basic Configurations -----------------------------------------------
 
 #----------------------------------------------- Boot Configurations ------------------------------------------------
-def setup_contrab():
-    with open("/var/spool/cron/crontabs/root", "a") as file:
-        file.write("@reboot /bin/bash -c '/home/frc_os/.pyenv/versions/3.9.13/bin/python3 /home/frc_os/startup.py >> /home/frc_os/logs/startup_output.log 2>&1'")
+def setup_crontab():
+    cron_job = "@reboot /home/frc_os/frc_os/.venv/bin/python /home/frc_os/startup.py >> /home/frc_os/logs/startup.log 2>&1\n"
+
+    result = subprocess.run("crontab -l", shell=True, capture_output=True, text=True)
+    current_crontab = result.stdout if result.returncode == 0 else ""
+
+    if cron_job in current_crontab:
+        print("The crontab is already configured")
+        return
+
+    updated_crontab = current_crontab + cron_job
+    result = subprocess.run("crontab -", shell=True, input=updated_crontab, text=True)
+
 #----------------------------------------------- Boot Configurations ------------------------------------------------

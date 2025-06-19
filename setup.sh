@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Variáveis para armazenar os valores das flags
 type=""
 
-# Processa as opções
 while getopts t: opt; do
   case $opt in
     t)
@@ -17,11 +15,10 @@ while getopts t: opt; do
 done
 
 if [ "$type" = "total" ]; then
-    cd /home
-    sudo python3 -m frc_os.main --type total
+  cd ..
+    sudo python -m frc_os.setup --type total
 elif [ "$type" = "network" ]; then
-    cd /home
-    sudo python3 -m frc_os.main --type network
+    sudo python -m frc_os.setup --type total
 else
     echo "Invalid option, use -t total to config all things or -t network to setup network settings"
 

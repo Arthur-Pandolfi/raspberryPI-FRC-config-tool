@@ -1,4 +1,5 @@
+psutil
 pycoral
 gpiozero
 tflite-runtime
-pynetwroktables
+pynetworktables

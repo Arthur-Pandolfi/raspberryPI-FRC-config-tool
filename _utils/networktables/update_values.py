@@ -28,7 +28,6 @@ async def get_disk_usage():
 
 async def update_ram():
     ram_entry = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME")).getSubTable("System").getSubTable("Infos").getEntry("RAM")
-    ram = virtual_memory()
     while True:
         ram_total, ram_usage, ram_free = await get_ram()
         ram_entry.setStringArray([f"{ram_total:.2f}", f"{ram_usage:.2f}", f"{ram_free:.2f}"])

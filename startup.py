@@ -6,8 +6,8 @@ from _utils import environment, logs
 from _utils.networktables import update_values
 from networktables import NetworkTables
 
-LOGS_PATH = "./logs/startup.log"
-logs.create_log(LOGS_PATH)
+LOGS_PATH = "/home/frc_os/frc_os/logs/"
+LOGS_NAME = "/home/frc_os/frc_os/logs/startup.log"
 
 def _get_ip():
     ip = subprocess.run(["ifconfig eth0 | grep inet"], shell=True,  capture_output=True, text=True)
@@ -19,29 +19,29 @@ async def _connect_network_tables() -> bool:
     roboRIO_ip = environment.get_environment_var("ROBORIO_IP")
     NetworkTables.initialize(roboRIO_ip)
 
-    logs.write_log(LOGS_PATH, f"Connecting to network tables {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Connecting to network tables // IP: {roboRIO_ip} // {logs.get_time()} \n")
     while not NetworkTables.isConnected():
         await asyncio.sleep(delay=0.5)
-    logs.write_log(LOGS_PATH, f"Connected to network tables! {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Connected to network tables! {logs.get_time()} \n")
     
     gc.collect()
     return True
 
 async def _create_table():
-    logs.write_log(LOGS_PATH, f"Creating default table {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Creating default table {logs.get_time()} \n")
     NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME"))
-    logs.write_log(LOGS_PATH, f"Default table created! {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Default table created! {logs.get_time()} \n")
 
     gc.collect()
 
 async def _create_subtables():
-    logs.write_log(LOGS_PATH, f"Creating subtables {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Creating subtables {logs.get_time()} \n")
     system_table = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME")).getSubTable("System")
     system_table.getSubTable("Config")    
-    logs.write_log(LOGS_PATH, f"Config subtable created {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Config subtable created {logs.get_time()} \n")
     system_table.getSubTable("Infos")
-    logs.write_log(LOGS_PATH, f"Infos subtable created {logs.get_time()} \n")
-    logs.write_log(LOGS_PATH, f"All subtables created! {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Infos subtable created {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"All subtables created! {logs.get_time()} \n")
     gc.collect()    
 
 async def _create_system_substable_entrys():
@@ -56,8 +56,9 @@ async def _create_system_substable_entrys():
 
 async def _create_infos_subtable_entrys():
     table = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME"))
-    infos_table = table.getSubTable("Infos")  
-
+    system_table = table.getSubTable("System")
+    infos_table = system_table.getSubTable("Infos")
+      
     disk_total, disk_used, disk_free = await update_values.get_disk_usage()
     ram_total, ram_usage, ram_free = await update_values.get_ram()
     
@@ -80,12 +81,12 @@ async def _create_infos_subtable_entrys():
     gc.collect()
 
 async def _create_entrys():
-    logs.write_log(LOGS_PATH, f"Creating entrys {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"Creating entrys {logs.get_time()} \n")
     
     await _create_system_substable_entrys()
     await _create_infos_subtable_entrys()
 
-    logs.write_log(LOGS_PATH, f"All entrys created! {logs.get_time()} \n")
+    logs.write_log(LOGS_NAME, f"All entrys created! {logs.get_time()} \n")
     NetworkTables.flush()
     gc.collect()
 # ----------------------------------------- Network Tables initialization -----------------------------------------
@@ -99,9 +100,8 @@ async def _network_tables():
 
 
 async def main():
-     print("starting")
+     logs.create_log(LOGS_PATH, LOGS_NAME)
      await _network_tables()
-     print("finish")
 
 
 if __name__ == "__main__":
