@@ -1,4 +1,6 @@
+import os
 import gc
+import shutil
 import subprocess
 from typing import Union
 from . import environment
@@ -17,20 +19,21 @@ def get_wanted_ip() -> list[str, str]:
         try:
             ip = input("Write the wanted IP here: ")
             netmask = input("Write the wanted netmask here (type 0 to default -> 255.255.255.0): ")
+            gateway = input("Write the gateway here: (the dafult gateway is 10.TE.AM.1): ")
             
             if netmask == "0":
                 netmask = "255.255.255.0"
             
-            return ip, netmask
+            return ip, netmask, gateway
         
         except Exception:
-            print("\nPlease, write a ip and netmask\n")
+            print("\nPlease, write a ip, gateway and netmask\n")
 
 def get_raspberry_name() -> str:
     name = input("Enter the wanted name to show in NetworkTables [0 for the user name]: ")
 
     if name == "0":
-        user_name = subprocess.run("whoami", shell=True, capture_output=True, text=True)
+        user_name = subprocess.run("whoami", shell=True, stdout=subprocess.DEVNULL)
         name = f"raspberry-{user_name.stdout}"
         return name
     else:
@@ -64,7 +67,7 @@ def set_roboRIO_ip() -> None:
     environment.add_environment_var(val=f"ROBORIO_IP={final_ip}")
     gc.collect()
 
-def set_rasp_ip(ip: str, netmask: str = "255.255.255.0") -> None:
+def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None:
     netmask_to_cidr = {
     "255.0.0.0":        "/8",
     "255.255.0.0":      "/16",
@@ -77,31 +80,44 @@ def set_rasp_ip(ip: str, netmask: str = "255.255.255.0") -> None:
     "255.255.255.252":  "/30",
     "255.255.255.255":  "/32"
     }
+    
+    frc_connection_profile_name = "FRC-scenario"
+    www_cnnection_profile_name = "World Wide Web Scenario"
 
-    ip_config_file = f"""
-    interface eth0
-    static ip_address={ip}{netmask_to_cidr[netmask]}
-    static routers={ip}
-    static domain_name_servers=8.8.8.8 1.1.1.1
-    """
+    commands_frc_connection = [
+        f'sudo nmcli c add type ethernet ifname eth0 con-name f"{frc_connection_profile_name}"',
+        f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.addres {ip}/{netmask_to_cidr[netmask]}',
+        f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.gateway {gateway}',
+        f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.method manual',
+        f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.dns ""',
+        f'sudo nmcli con up "{frc_connection_profile_name}"',
+    ]
 
-    with open("/etc/dhcpcd.conf", "a") as file:
-        file.write("\n" + ip_config_file)
+    commands_www_connection = [
+        f'sudo nmcli c add type ethernet ifname eth0 con-name "{www_cnnection_profile_name}"',
+        f'sudo nmcli mod "{www_cnnection_profile_name}" ipv4.method auto'
+    ]
 
 #----------------------------------------------- Basic Configurations -----------------------------------------------
 
 #----------------------------------------------- Boot Configurations ------------------------------------------------
-def setup_crontab():
-    cron_job = "@reboot /home/frc_os/frc_os/.venv/bin/python /home/frc_os/startup.py >> /home/frc_os/logs/startup.log 2>&1\n"
+def setup_autorun_scripts() -> None:
+    if not os.path.exists("/opt/InitScripts"):
+        os.mkdir("/opt/InitScripts")
+        os.chdir("/home/$USER/raspberryPI-custom_frcOS/")
+    
+    # Move the scripts to the path
+    for archive in os.listdir("./scripts"):
+        shutil.move(f"./scripts/{archive}", "/opt/InitScripts")
 
-    result = subprocess.run("crontab -l", shell=True, capture_output=True, text=True)
-    current_crontab = result.stdout if result.returncode == 0 else ""
+    # Create the .venv and download the required libs
+    subprocess.run(
+        "pip install pynetworktables psutil gpiozero",
+        shell=True,
+        # stdout=subprocess.DEVNULL
+    )
 
-    if cron_job in current_crontab:
-        print("The crontab is already configured")
-        return
-
-    updated_crontab = current_crontab + cron_job
-    result = subprocess.run("crontab -", shell=True, input=updated_crontab, text=True)
-
+    # Move the service and start
+    shutil.move("startup_service.service", "/etc/systemd/system")
+    subprocess.run("sudo systemctl enable startup_service", shell=True, stdout=subprocess.DEVNULL)
 #----------------------------------------------- Boot Configurations ------------------------------------------------

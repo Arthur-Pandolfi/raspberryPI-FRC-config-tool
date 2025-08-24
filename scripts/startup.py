@@ -2,12 +2,13 @@ import gc
 import psutil
 import asyncio
 import subprocess
-from _utils import environment, logs
-from _utils.networktables import update_values
+from ._utils import logs
+from ._utils import environment
+from ._utils.network_tables import update_values
 from networktables import NetworkTables
 
-LOGS_PATH = "/home/frc_os/frc_os/logs/"
-LOGS_NAME = "/home/frc_os/frc_os/logs/startup.log"
+LOGS_PATH = "/home/frc9485/logs/"
+LOGS_NAME = "/home/frc9485/logs/startup.log"
 
 def _get_ip():
     ip = subprocess.run(["ifconfig eth0 | grep inet"], shell=True,  capture_output=True, text=True)
