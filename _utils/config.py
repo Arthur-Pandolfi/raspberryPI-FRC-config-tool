@@ -33,8 +33,8 @@ def get_raspberry_name() -> str:
     name = input("Enter the wanted name to show in NetworkTables [0 for the user name]: ")
 
     if name == "0":
-        user_name = subprocess.run("whoami", shell=True, stdout=subprocess.DEVNULL)
-        name = f"raspberry-{user_name.stdout}"
+        user = os.environ.get("SUDO_USER", os.environ["USER"])   
+        name = f"raspberry-{user}"
         return name
     else:
         return name
@@ -69,16 +69,16 @@ def set_roboRIO_ip() -> None:
 
 def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None:
     netmask_to_cidr = {
-    "255.0.0.0":        "/8",
-    "255.255.0.0":      "/16",
-    "255.255.255.0":    "/24",
-    "255.255.255.128":  "/25",
-    "255.255.255.192":  "/26",
-    "255.255.255.224":  "/27",
-    "255.255.255.240":  "/28",
-    "255.255.255.248":  "/29",
-    "255.255.255.252":  "/30",
-    "255.255.255.255":  "/32"
+    "255.0.0.0":        "8",
+    "255.255.0.0":      "16",
+    "255.255.255.0":    "24",
+    "255.255.255.128":  "25",
+    "255.255.255.192":  "26",
+    "255.255.255.224":  "27",
+    "255.255.255.240":  "28",
+    "255.255.255.248":  "29",
+    "255.255.255.252":  "30",
+    "255.255.255.255":  "32"
     }
     
     frc_connection_profile_name = "FRC-scenario"
@@ -93,28 +93,61 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
         f'sudo nmcli con up "{frc_connection_profile_name}"',
     ]
 
+    for command in commands_frc_connection:
+        subprocess.run(
+            command,
+            shell=True,
+            stdout=subprocess.DEVNULL
+        )
+
     commands_www_connection = [
         f'sudo nmcli c add type ethernet ifname eth0 con-name "{www_cnnection_profile_name}"',
-        f'sudo nmcli mod "{www_cnnection_profile_name}" ipv4.method auto'
+        f'sudo nmcli c mod "{www_cnnection_profile_name}" ipv4.method auto'
     ]
+
+    for command in commands_www_connection:
+        subprocess.run(
+            command,
+            shell=True,
+            stdout=subprocess.DEVNULL
+        )
 
 #----------------------------------------------- Basic Configurations -----------------------------------------------
 
 #----------------------------------------------- Boot Configurations ------------------------------------------------
-def setup_autorun_scripts() -> None:
-    if not os.path.exists("/opt/InitScripts"):
-        os.mkdir("/opt/InitScripts")
-        os.chdir("/home/$USER/raspberryPI-custom_frcOS/")
+def setup_autorun_scripts(python_binary_path: str) -> None:
+    user = os.environ.get("SUDO_USER", os.environ["USER"])   
+    os.chdir(f"/home/{user}/raspberryPI-custom_frcOS/")
+
+    # Create the .sh for start python script
+    with open("./scripts/start.sh", "w+") as file:
+        lines = [
+            "#!/bin/bash\n",
+            "cd /opt\n",
+            f"{python_binary_path}/python -m InitScripts.startup >> /var/log/startup_script.log\n"
+        ]
+
+        for line in lines:
+            file.write(line)
     
+    subprocess.run(
+        "sudo chmod +x ./scripts/start.sh",
+        shell=True,
+        stdout=subprocess.DEVNULL
+    )
+
+    if not os.path.exists("/opt/InitScripts"):
+        os.mkdir("/opt/InitScripts") 
+
     # Move the scripts to the path
     for archive in os.listdir("./scripts"):
         shutil.move(f"./scripts/{archive}", "/opt/InitScripts")
 
     # Create the .venv and download the required libs
     subprocess.run(
-        "pip install pynetworktables psutil gpiozero",
+        f"{python_binary_path}/pip install pynetworktables psutil gpiozero",
         shell=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
 
     # Move the service and start

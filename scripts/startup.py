@@ -1,4 +1,5 @@
 import gc
+import os
 import psutil
 import asyncio
 import subprocess
@@ -7,13 +8,20 @@ from ._utils import environment
 from ._utils.network_tables import update_values
 from networktables import NetworkTables
 
-LOGS_PATH = "/home/frc9485/logs/"
-LOGS_NAME = "/home/frc9485/logs/startup.log"
+user = os.environ.get("SUDO_USER", os.environ["USER"])   
+
+
+LOGS_PATH = f"/home/{user}/logs/"
+LOGS_NAME = f"/home/{user}/logs/startup.log"
 
 def _get_ip():
-    ip = subprocess.run(["ifconfig eth0 | grep inet"], shell=True,  capture_output=True, text=True)
-    ip = ip.stdout.split()
-    return ip[1]
+    eth0 = subprocess.run(["ip addr | grep eth0"], shell=True,  capture_output=True, text=True)
+    eth0_splited = eth0.stdout.split()
+    pos = 0
+    for info in eth0_splited:
+        pos += 1
+        if info == "brd":
+            return eth0_splited[pos]
 
 # ----------------------------------------- Network Tables initialization -----------------------------------------
 async def _connect_network_tables() -> bool:
@@ -45,15 +53,6 @@ async def _create_subtables():
     logs.write_log(LOGS_NAME, f"All subtables created! {logs.get_time()} \n")
     gc.collect()    
 
-async def _create_system_substable_entrys():
-    table = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME"))
-    system_table = table.getSubTable("System")
-    config_table = system_table.getSubTable("Config")    
-
-    # Config subtable entrys
-    config_table.getEntry("Network").setStringArray("")
-    config_table.getEntry("Commands").setStringArray("")
-    config_table.getEntry("Max_CPU_Usage").setString("")
 
 async def _create_infos_subtable_entrys():
     table = NetworkTables.getTable(environment.get_environment_var("RASPBERRY_NAME"))
@@ -72,19 +71,15 @@ async def _create_infos_subtable_entrys():
 
     infos_table.getEntry("CPU_Info").setStringArray([cpu_count, cpu_usage, f"{cpu_temp}Cº"])
     infos_table.getEntry("Disk_info").setStringArray([f"{disk_total:.2f} GB", f"{disk_used:.2f} GB", f"{disk_free:.2f} GB"])
-    infos_table.getEntry("Coral_is_available").setBoolean(False)
     infos_table.getEntry("IP").setString(_get_ip())
     infos_table.getEntry("RAM").setStringArray([f"{ram_total:.2f}", f"{ram_usage:.2f}",f"{ram_free:.2f}"])
-    infos_table.getEntry("Hearthbeat").setBoolean(True)
     infos_table.getEntry("Status").setString("Starting vision script")
-    infos_table.getEntry("Error").setStringArray([""])
 
     gc.collect()
 
 async def _create_entrys():
     logs.write_log(LOGS_NAME, f"Creating entrys {logs.get_time()} \n")
     
-    await _create_system_substable_entrys()
     await _create_infos_subtable_entrys()
 
     logs.write_log(LOGS_NAME, f"All entrys created! {logs.get_time()} \n")
@@ -102,8 +97,10 @@ async def _network_tables():
 
 async def main():
      logs.create_log(LOGS_PATH, LOGS_NAME)
-     await _network_tables()
 
+    # Update constantly the values1
+     while True:
+        await _network_tables()
 
 if __name__ == "__main__":
     asyncio.run(main())
