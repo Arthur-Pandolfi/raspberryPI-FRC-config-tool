@@ -147,6 +147,54 @@ def _setup_shell():
     sleep(2)
     os.system("clear")
 
+def _setup_rust():
+    user = os.environ.get("SUDO_USER", os.environ["USER"])
+
+    subprocess.run(
+        f"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /home/{user}/rustup-install.sh",
+        shell=True,
+        text=True
+    )
+
+    subprocess.run(
+        f"sh /home/{user}/rustup-install.sh -y",
+        shell=True,
+        text=True
+    )
+
+    env = os.environ.copy()
+    env["CARGO_HOME"] = f"/home/{user}/.cargo"
+    env["RUSTUP_HOME"] = f"/home/{user}/.rustup"
+    env["PATH"] = f"/home/{user}/.cargo/bin:" + env["PATH"]
+
+    subprocess.run(
+        f"rustup default stable", 
+        shell=True, 
+        check=True,
+        env=env
+    )
+
+    subprocess.run(
+        f"sudo apt install eza -y",
+        shell=True,
+    )
+
+    subprocess.run(
+        f"cargo install bat",
+        shell=True,
+        check=True,
+        env=env
+    )
+
+    zshrc = f"/home/{user}/.zshrc"
+
+    with open(zshrc, "a") as f:
+        f.write('\nexport CARGO_HOME="$HOME/.cargo"\n')
+        f.write('export RUSTUP_HOME="$HOME/.rustup"\n')
+        f.write('export PATH="$HOME/.cargo/bin:$PATH"\n')
+        f.write('alias ls="exa --icons"\n')
+        f.write('alias cat="bat"\n')
+
 def main():
     print("Downloading requireds dependencies...")
     _install_dependencies()
@@ -157,6 +205,10 @@ def main():
     setup_shell = input("Do you want to setup the shell to ZSH with pwoerlevel10k (requires a nerd font) Y/N ")
     if setup_shell.lower().strip() == "y":
         _setup_shell()
+
+    setup_rust = input("Do you want to setup rust, eza and bat tools? Y/N ")
+    if setup_rust.lower().strip() == "y":
+        _setup_rust()
     
     if execution_type == "total":   
         python_path = input("Please, put the full path for your python 3.11 binary directory (ex: /python3.11/bin/): ").strip()
