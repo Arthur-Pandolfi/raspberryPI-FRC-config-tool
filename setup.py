@@ -66,7 +66,7 @@ def _setup_shell():
     subprocess.run(
         "sudo apt install zsh -y", 
         shell=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
     
     print("Downloading Oh My Zsh")
@@ -75,7 +75,7 @@ def _setup_shell():
         input="y\n",
         shell=True,
         text=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
 
     # Change the shell to ZSH
@@ -84,7 +84,7 @@ def _setup_shell():
     subprocess.run(
         f"sudo chsh -s /bin/zsh {user}",
         shell=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
 
     # Download Powerlevel10k and set for default theme
@@ -92,14 +92,14 @@ def _setup_shell():
     subprocess.run(
         f"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/{user}/powerlevel10k",
         shell=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
 
     print("Setting the powerlevel10k as default theme")
     subprocess.run(
         f"echo 'source /home/{user}/powerlevel10k/powerlevel10k.zsh-theme' >>/home/{user}/.zshrc",
         shell=True,
-        # stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL
     )
 
     # Config the plugins
@@ -172,7 +172,7 @@ def main():
     print("\nEnd of setup!\n")
     if input("Do you want to reboot now [Y/N]: ").strip().lower() == "y":
         print("Rebooting to apply changes...")
-        # subprocess.run("sudo reboot", shell=True)
+        subprocess.run("sudo reboot", shell=True)
 
 if __name__ == "__main__":
     main()
