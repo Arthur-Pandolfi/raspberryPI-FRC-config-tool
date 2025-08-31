@@ -82,7 +82,7 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
     }
     
     frc_connection_profile_name = "FRC-scenario"
-    www_cnnection_profile_name = "World Wide Web Scenario"
+    www_cnnection_profile_name = "World-Wide-Web-Scenario"
 
     commands_frc_connection = [
         f'sudo nmcli c add type ethernet ifname eth0 con-name f"{frc_connection_profile_name}"',

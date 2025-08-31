@@ -29,7 +29,7 @@ def _team_number_config():
     config.set_team_number(number=number)
 
 def _network_config():
-    command_outside_frc = "sudo nmcli con down FRC-Scenario / sudo nmcli con up World Wide Web Scenario"
+    command_outside_frc = "sudo nmcli con down FRC-Scenario / sudo nmcli con up World-Wide-Web-Scenario"
 
     config.set_roboRIO_ip()
     config.set_raspberry_name()
