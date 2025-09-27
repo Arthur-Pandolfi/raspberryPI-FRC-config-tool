@@ -107,7 +107,6 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
     ]
 
     for command in commands_frc_connection:
-        print(command)
         subprocess.run(
             command,
             shell=True,
