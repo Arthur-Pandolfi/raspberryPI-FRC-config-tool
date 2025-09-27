@@ -41,8 +41,22 @@ def get_raspberry_name() -> str:
 
 # Set functions
 def reset_envs():
-    with open("/etc/environment", "w+"):
-        pass
+    ALL_ENVS = [
+        "ROBORIO_IP",
+        "TEAM_NUMBER",
+        "RASPBERRY_NAME"
+    ]
+
+    with open("/etc/environment", "r") as f:
+        content = f.readlines()
+
+    new_content = []
+    for line in content:
+        if not any(line.strip().startswith(env + "=") for env in ALL_ENVS):
+            new_content.append(line)
+
+    with open("/etc/environment", "w") as f:
+        f.writelines(new_content)
 
 def set_raspberry_name():
     name = get_raspberry_name()
@@ -85,15 +99,15 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
     www_cnnection_profile_name = "World-Wide-Web-Scenario"
 
     commands_frc_connection = [
-        f'sudo nmcli c add type ethernet ifname eth0 con-name f"{frc_connection_profile_name}"',
+        f'sudo nmcli c add type ethernet ifname eth0 con-name {frc_connection_profile_name}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.addres {ip}/{netmask_to_cidr[netmask]}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.gateway {gateway}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.method manual',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.dns ""',
-        f'sudo nmcli con up "{frc_connection_profile_name}"',
     ]
 
     for command in commands_frc_connection:
+        print(command)
         subprocess.run(
             command,
             shell=True,
@@ -117,7 +131,7 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
 #----------------------------------------------- Boot Configurations ------------------------------------------------
 def setup_autorun_scripts(python_binary_path: str) -> None:
     user = os.environ.get("SUDO_USER", os.environ["USER"])   
-    os.chdir(f"/home/{user}/raspberryPI-custom_frcOS/")
+    os.chdir(f"/home/{user}/raspberryPI-FRC-config-tool/")
 
     # Create the .sh for start python script
     with open("./scripts/start.sh", "w+") as file:
