@@ -65,10 +65,9 @@ async def _create_infos_subtable_entrys():
     cpu_count = psutil.cpu_count()
     cpu_temp = 50 
     cpu_usage = await update_values.get_cpu_usage()
-    # Im dont using this function bacause im emualting the ubuntu in WSL 2.0, and don't have sesnors to get CPU temp 
-    # await update_values.get_cpu_temperature()
+    cpu_temp = await update_values.get_cpu_temperature()
     
-
+    infos_table.getWnret("CPU_temp").setString(f"{cpu_temp}ºC")
     infos_table.getEntry("CPU_Info").setStringArray([cpu_count, cpu_usage, f"{cpu_temp}Cº"])
     infos_table.getEntry("Disk_info").setStringArray([f"{disk_total:.2f} GB", f"{disk_used:.2f} GB", f"{disk_free:.2f} GB"])
     infos_table.getEntry("IP").setString(_get_ip())
