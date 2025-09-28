@@ -176,7 +176,13 @@ def setup_autorun_scripts(python_binary_path: str) -> None:
 
     # Create the .venv and download the required libs
     subprocess.run(
-        f"{python_binary_path}/pip install pynetworktables psutil gpiozero",
+        f"{python_binary_path}/pip install pynetworktables psutil gpiozero pigpio",
+        shell=True,
+        stdout=subprocess.DEVNULL
+    )
+
+    subprocess.run(
+        "sudo systemctl enable pigpiod",
         shell=True,
         stdout=subprocess.DEVNULL
     )
