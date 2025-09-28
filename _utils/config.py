@@ -137,7 +137,7 @@ def create_service() -> None:
             "After=network.target\n",
             "\n[Service]\n",
             "Type=simple\n",
-            f"Environment=SUDO_USER={user}\n",
+            f"Environment=USER={user}\n",
             "ExecStart=/opt/InitScripts/start.sh\n",
             "Restart=always\n"
             "RestartSec=12\n",
