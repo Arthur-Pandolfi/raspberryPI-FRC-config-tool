@@ -40,7 +40,7 @@ def get_raspberry_name() -> str:
         return name
 
 # Set functions
-def reset_envs():
+def reset_envs() -> None:
     ALL_ENVS = [
         "ROBORIO_IP",
         "TEAM_NUMBER",
@@ -58,7 +58,7 @@ def reset_envs():
     with open("/etc/environment", "w") as f:
         f.writelines(new_content)
 
-def set_raspberry_name():
+def set_raspberry_name() -> None:
     name = get_raspberry_name()
     environment.add_environment_var(f"RASPBERRY_NAME={name}")
 
@@ -128,20 +128,37 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
 #----------------------------------------------- Basic Configurations -----------------------------------------------
 
 #----------------------------------------------- Boot Configurations ------------------------------------------------
+def create_service() -> None:
+    with open("/etc/systemd/system/startup_service.service", "w+") as f:
+        lines = [
+            "[Unit]\n",
+            "Description=This script initializes the NetworkTables and change the autorun script\n",
+            "After=network.target\n",
+            "\n[Service]\n",
+            "Type=simple\n",
+            f"Environment=SUDO_USER=hyobots\n",
+            "ExecStart=/opt/InitScripts/start.sh\n",
+            "Restart=always\n"
+            "RestartSec=10\n",
+            "\n[Install]\n",
+            "WantedBy=multi-user.target\n"
+        ]
+
+        f.writelines(lines)
+
 def setup_autorun_scripts(python_binary_path: str) -> None:
     user = os.environ.get("SUDO_USER", os.environ["USER"])   
     os.chdir(f"/home/{user}/raspberryPI-FRC-config-tool/")
 
     # Create the .sh for start python script
-    with open("./scripts/start.sh", "w+") as file:
+    with open("./scripts/start.sh", "w+") as f:
         lines = [
             "#!/bin/bash\n",
             "cd /opt\n",
             f"{python_binary_path}/python -m InitScripts.startup >> /var/log/startup_script.log\n"
         ]
 
-        for line in lines:
-            file.write(line)
+        f.writelines(lines)
     
     subprocess.run(
         "sudo chmod +x ./scripts/start.sh",
@@ -163,7 +180,6 @@ def setup_autorun_scripts(python_binary_path: str) -> None:
         stdout=subprocess.DEVNULL
     )
 
-    # Move the service and start
-    shutil.move("startup_service.service", "/etc/systemd/system")
+    # Enable the service
     subprocess.run("sudo systemctl enable startup_service", shell=True, stdout=subprocess.DEVNULL)
 #----------------------------------------------- Boot Configurations ------------------------------------------------

@@ -160,6 +160,7 @@ def main():
     
     if execution_type == "total":   
         python_path = input("Please, put the full path for your python 3.11 binary directory (ex: /python3.11/bin/): ").strip()
+        config.create_service()
         config.setup_autorun_scripts(python_path)
         _team_number_config()
         _network_config()

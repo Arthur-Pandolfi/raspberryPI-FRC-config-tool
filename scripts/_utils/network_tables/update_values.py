@@ -1,7 +1,7 @@
-from .. import environment
+from psutil import virtual_memory, cpu_percent, disk_usage
 from gpiozero import CPUTemperature
 from networktables import NetworkTables
-from psutil import virtual_memory, cpu_percent, disk_usage
+from .. import environment
 
 async def get_ram():
     ram = virtual_memory()
