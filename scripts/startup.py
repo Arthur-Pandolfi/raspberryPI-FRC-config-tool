@@ -10,7 +10,6 @@ from networktables import NetworkTables
 
 user = os.environ.get("SUDO_USER", os.environ["USER"])   
 
-
 LOGS_PATH = f"/home/{user}/logs/"
 LOGS_NAME = f"/home/{user}/logs/startup.log"
 
@@ -93,11 +92,10 @@ async def _network_tables():
     await _create_subtables()
     await _create_entrys()
 
-
 async def main():
      logs.create_log(LOGS_PATH, LOGS_NAME)
 
-    # Update constantly the values1
+    # Update constantly the values
      while True:
         await _network_tables()
 
