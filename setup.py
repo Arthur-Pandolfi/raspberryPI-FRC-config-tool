@@ -130,11 +130,16 @@ def _setup_shell():
         stdout=subprocess.DEVNULL
     )
 
-    # Add the backwar-word and forward-word using Ctrl + Arrow
+    # Add the backward-word and forward-word using Ctrl + Arrow and pyenv auto eval venvs
     with open(f"/home/{user}/.zshrc", "a") as file:
         if file.writable():
-            file.write('\nbindkey "^[[1;5C" forward-word\n')
-            file.write('bindkey "^[[1;5D" backward-word\n')
+            lines = [
+                '\nbindkey "^[[1;5C" forward-word\n',
+                'bindkey "^[[1;5D" backward-word\n',
+                'eval "$(pyenv virtualenv-init -)"\n'
+            ]
+
+            file.writelines(lines)
 
     print(f"Removing the only root permission on home directory... {user}")
     subprocess.run(
