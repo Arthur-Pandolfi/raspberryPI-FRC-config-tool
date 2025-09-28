@@ -99,7 +99,7 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
     www_cnnection_profile_name = "World-Wide-Web-Scenario"
 
     commands_frc_connection = [
-        f'sudo nmcli c add type ethernet ifname eth0 con-name {frc_connection_profile_name}',
+        f'sudo nmcli c add type ethernet ifname end0 con-name {frc_connection_profile_name}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.addres {ip}/{netmask_to_cidr[netmask]}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.gateway {gateway}',
         f'sudo nmcli c mod "{frc_connection_profile_name}" ipv4.method manual',
@@ -114,7 +114,7 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
         )
 
     commands_www_connection = [
-        f'sudo nmcli c add type ethernet ifname eth0 con-name "{www_cnnection_profile_name}"',
+        f'sudo nmcli c add type ethernet ifname end0 con-name "{www_cnnection_profile_name}"',
         f'sudo nmcli c mod "{www_cnnection_profile_name}" ipv4.method auto'
     ]
 
@@ -164,7 +164,7 @@ def setup_autorun_scripts(python_binary_path: str) -> None:
         "sudo chmod +x ./scripts/start.sh",
         shell=True,
         stdout=subprocess.DEVNULL
-    )
+    )f
 
     if not os.path.exists("/opt/InitScripts"):
         os.mkdir("/opt/InitScripts") 
