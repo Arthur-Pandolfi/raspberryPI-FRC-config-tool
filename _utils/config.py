@@ -140,7 +140,9 @@ def create_service() -> None:
             f"Environment=SUDO_USER={user}\n",
             "ExecStart=/opt/InitScripts/start.sh\n",
             "Restart=always\n"
-            "RestartSec=10\n",
+            "RestartSec=12\n",
+            "StandardOutput=journal\n",
+            "StandardError=journal\n",
             "\n[Install]\n",
             "WantedBy=multi-user.target\n"
         ]
