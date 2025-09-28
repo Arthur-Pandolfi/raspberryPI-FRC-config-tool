@@ -129,6 +129,7 @@ def setup_network(gateway: str, ip: str, netmask: str = "255.255.255.0") -> None
 
 #----------------------------------------------- Boot Configurations ------------------------------------------------
 def create_service() -> None:
+    user = os.environ.get("SUDO_USER", os.environ["USER"])
     with open("/etc/systemd/system/startup_service.service", "w+") as f:
         lines = [
             "[Unit]\n",
@@ -136,7 +137,7 @@ def create_service() -> None:
             "After=network.target\n",
             "\n[Service]\n",
             "Type=simple\n",
-            f"Environment=SUDO_USER=hyobots\n",
+            f"Environment=SUDO_USER={user}\n",
             "ExecStart=/opt/InitScripts/start.sh\n",
             "Restart=always\n"
             "RestartSec=10\n",
