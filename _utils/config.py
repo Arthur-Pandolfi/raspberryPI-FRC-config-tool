@@ -164,7 +164,7 @@ def setup_autorun_scripts(python_binary_path: str) -> None:
         "sudo chmod +x ./scripts/start.sh",
         shell=True,
         stdout=subprocess.DEVNULL
-    )f
+    )
 
     if not os.path.exists("/opt/InitScripts"):
         os.mkdir("/opt/InitScripts") 
