@@ -14,8 +14,8 @@ LOGS_PATH = f"/home/{user}/logs/"
 LOGS_NAME = f"/home/{user}/logs/startup.log"
 
 def _get_ip():
-    eth0 = subprocess.run(["ip addr | grep eth0"], shell=True,  capture_output=True, text=True)
-    eth0_splited = eth0.stdout.split()
+    end0 = subprocess.run(["ip addr | grep end0"], shell=True,  capture_output=True, text=True)
+    end0_splited = eth0.stdout.split()
     pos = 0
     for info in eth0_splited:
         pos += 1
