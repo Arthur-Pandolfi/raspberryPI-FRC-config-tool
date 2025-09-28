@@ -41,7 +41,7 @@ def _install_dependencies():
     dependencies = [
             "ufw", "git", "curl", "wget", "build-essential", "make", \
             "build-essential", "libssl-dev", "zlib1g-dev", "libffi-dev", "liblzma-dev", \
-            "network-manager"
+            "network-manager", "btop", "htop"
         ]
     
     for dependency in dependencies:
