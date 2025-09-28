@@ -8,7 +8,7 @@ from ._utils import environment
 from ._utils.network_tables import update_values
 from networktables import NetworkTables
 
-user = os.environ.get("SUDO_USER", os.environ["USER"])   
+user = os.environ.get("USER")   
 
 LOGS_PATH = f"/home/{user}/logs/"
 LOGS_NAME = f"/home/{user}/logs/startup.log"
