@@ -136,9 +136,12 @@ def _setup_shell():
             lines = [
                 '\nbindkey "^[[1;5C" forward-word\n',
                 'bindkey "^[[1;5D" backward-word\n',
+                'export PYENV_ROOT="$HOME/.pyenv"\n',
+                '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"\n',
+                'eval "$(pyenv init - zsh)"\n',
                 'eval "$(pyenv virtualenv-init -)"\n'
             ]
-
+            
             file.writelines(lines)
 
     print(f"Removing the only root permission on home directory... {user}")
