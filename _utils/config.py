@@ -150,6 +150,7 @@ def create_service() -> None:
         f.writelines(lines)
 
 def setup_autorun_scripts(python_binary_path: str) -> None:
+    import os
     user = os.environ.get("SUDO_USER", os.environ["USER"])   
     os.chdir(f"/home/{user}/raspberryPI-FRC-config-tool/")
 
@@ -157,8 +158,14 @@ def setup_autorun_scripts(python_binary_path: str) -> None:
     with open("./scripts/start.sh", "w+") as f:
         lines = [
             "#!/bin/bash\n",
+            "set -a\n",
+            ". /etc/environment\n",
+            "set +a\n",
             "cd /opt\n",
-            f"{python_binary_path}/python -m InitScripts.startup >> /var/log/startup_script.log\n"
+            f"{python_binary_path}/python -m InitScripts.startup >> /var/log/startup_script.log &\n",
+            f"cd /home/{user}/VisionScripts/\n"
+            f"sh /home/{user}/VisionScripts/start.sh >> /var/log/vision_script.log &\n",
+            "wait\n"
         ]
 
         f.writelines(lines)
