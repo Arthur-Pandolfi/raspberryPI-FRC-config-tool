@@ -139,7 +139,7 @@ def create_service() -> None:
             "Type=simple\n",
             f"Environment=USER={user}\n",
             "ExecStart=/opt/InitScripts/start.sh\n",
-            "Restart=always\n"
+            "Restart=always\n",
             "RestartSec=12\n",
             "StandardOutput=journal\n",
             "StandardError=journal\n",
