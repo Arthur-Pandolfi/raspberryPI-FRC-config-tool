@@ -41,7 +41,7 @@ def _install_dependencies():
     dependencies = [
             "ufw", "git", "curl", "wget", "build-essential", "make", \
             "build-essential", "libssl-dev", "zlib1g-dev", "libffi-dev", "liblzma-dev", \
-            "numactl", "network-manager", "btop", "htop"
+            "network-manager", "btop", "htop"
         ]
     
     for dependency in dependencies:
@@ -155,31 +155,6 @@ def _setup_shell():
     sleep(2)
     os.system("clear")
 
-def _disable_swap():
-    subprocess.run(
-        "sudo dphys-swapfile swapoff",
-        shell=True,
-        stdout=subprocess.DEVNULL
-    )
-
-    subprocess.run(
-        "sudo dphys-swapfile uninstall",
-        shell=True,
-        stdout=subprocess.DEVNULL
-    )
-
-    subprocess.run(
-        "sudo update-rc.d dphys-swapfile remove",
-        shell=True,
-        stdout=subprocess.DEVNULL
-    )
-    
-    subprocess.run(
-        "sudo apt purge dphys-swapfile -y",
-        shell=True,
-        stdout=subprocess.DEVNULL
-    )
-
 def main():
     print("Downloading requireds dependencies...")
     _install_dependencies()
@@ -192,10 +167,7 @@ def main():
         _setup_shell()
     
     if execution_type == "total":   
-        python_path = input("Please, put the full path for your python 3.11 binary directory (ex: /python3.11/bin/): ").strip()
-        disable_swap = input("Do you want to disable SWAP? Y/N ")
-        if disable_swap.strip().lower() == "y":
-            _disable_swap()
+        python_path = input("Please, put the full path for your python 3.11 binary directory (/home/user/.pyenv/versions/3.11.9/bin/): ").strip()
         config.create_service()
         config.setup_autorun_scripts(python_path)
         _team_number_config()
